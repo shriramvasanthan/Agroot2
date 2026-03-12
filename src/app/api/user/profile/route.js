@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/user/profile?uid=<firebaseUID>
 export async function GET(request) {
     try {
