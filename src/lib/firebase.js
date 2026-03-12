@@ -19,9 +19,24 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-// Prevent re-initialisation in Next.js hot-reload
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const isConfigValid = !!firebaseConfig.apiKey;
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Prevent re-initialisation in Next.js hot-reload
+let app;
+if (isConfigValid) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+}
+
+export const auth = isConfigValid ? getAuth(app) : {
+    onAuthStateChanged: () => () => { },
+    currentUser: null,
+};
+
+export const db = isConfigValid ? getFirestore(app) : new Proxy({}, {
+    get: () => () => ({
+        doc: () => ({ get: () => Promise.resolve({ exists: false }) }),
+        collection: () => ({ doc: () => ({ get: () => Promise.resolve({ exists: false }) }) }),
+    })
+});
+
 export default app;
