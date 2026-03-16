@@ -27,13 +27,25 @@ if (isConfigValid) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 }
 
-export const auth = isConfigValid ? getAuth(app) : {
+// Build-safe mock for Firebase Auth
+const mockAuth = new Proxy({
     onAuthStateChanged: () => () => { },
     currentUser: null,
-    signInWithEmailAndPassword: () => Promise.reject('Firebase not initialized'),
-    createUserWithEmailAndPassword: () => Promise.reject('Firebase not initialized'),
     signOut: () => Promise.resolve(),
-};
+}, {
+    get: (target, prop) => {
+        if (prop in target) return target[prop];
+        // For any other access (like internal Firebase SDK methods), return a no-op
+        return () => {
+            if (typeof window !== 'undefined' && !isConfigValid) {
+                console.error(`Firebase error: Attempted to access "auth.${prop}" but Firebase is not initialized. Check your NEXT_PUBLIC_FIREBASE environment variables.`);
+            }
+            return Promise.reject(new Error('Firebase not initialized'));
+        };
+    }
+});
+
+export const auth = isConfigValid ? getAuth(app) : mockAuth;
 
 const dummyColl = () => ({
     doc: () => ({

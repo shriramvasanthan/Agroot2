@@ -15,11 +15,13 @@ export async function POST(request) {
             return NextResponse.json({ error: 'uid, name and email are required' }, { status: 400 });
         }
 
+        const userRole = email.toLowerCase() === 'admin@aurah.com' ? 'admin' : 'customer';
+
         const userDoc = {
             uid,
             name,
             email,
-            role: 'customer',
+            role: userRole,
             phone: null,
             address: null,
             createdAt: new Date().toISOString(),
@@ -43,13 +45,13 @@ export async function POST(request) {
             try {
                 await prisma.user.update({
                     where: { email },
-                    data: { id: uid, name }
+                    data: { id: uid, name, role: userRole }
                 });
             } catch (e) {
                 console.error('Migration failed, falling back to delete/create:', e.message);
                 await prisma.user.delete({ where: { email } });
                 await prisma.user.create({
-                    data: { id: uid, name, email, role: 'customer' }
+                    data: { id: uid, name, email, role: userRole }
                 });
             }
         } else {
@@ -64,7 +66,7 @@ export async function POST(request) {
                     id: uid,
                     name,
                     email,
-                    role: 'customer',
+                    role: userRole,
                 },
             });
         }

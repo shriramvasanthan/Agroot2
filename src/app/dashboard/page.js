@@ -40,8 +40,13 @@ export default function DashboardPage() {
     const fetchOrders = async () => {
         try {
             const res = await fetch(`/api/orders/user?userId=${user?.id}`);
-            setOrders(await res.json());
-        } catch { } finally { setLoadingOrders(false); }
+            const data = await res.json();
+            setOrders(Array.isArray(data) ? data : []);
+        } catch { 
+            setOrders([]);
+        } finally { 
+            setLoadingOrders(false); 
+        }
     };
 
     const handleLogout = () => { logout(); router.push('/'); };

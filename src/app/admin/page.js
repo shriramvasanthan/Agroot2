@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
-const ADMIN_PIN = '1234';
+const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || '1234';
 
 export default function AdminPage() {
     const { user, loading, logout } = useAuth();
@@ -35,7 +35,7 @@ export default function AdminPage() {
     const handleLogin = (e) => {
         e.preventDefault();
         if (pin === ADMIN_PIN) { setPinAuthed(true); }
-        else { setPinError('Incorrect PIN. Hint: 1234'); }
+        else { setPinError('Incorrect PIN.'); }
     };
 
     useEffect(() => {
@@ -122,7 +122,7 @@ export default function AdminPage() {
                         </button>
                     </form>
                     <p style={{ marginTop: '16px', fontSize: '0.72rem', color: 'var(--muted)', textAlign: 'center' }}>
-                        Demo PIN: <span style={{ color: 'var(--gold)' }}>1234</span>
+                        Secured Access
                     </p>
                 </div>
                 <style>{`
